@@ -1,3 +1,7 @@
-output "security_group_ids" {
-  value = [aws_security_group.allow_egress.id, aws_security_group.allow_http.id, aws_security_group.allow_https.id, aws_security_group.allow_ssh.id, aws_security_group.allow_3000.id]
+output "public_facing_security_group" {
+  value = aws_security_group.public_facing.id
+}
+
+output "private_ssh_security_group" {
+  value = aws_security_group.private_ssh.id
 }

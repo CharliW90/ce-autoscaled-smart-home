@@ -1,7 +1,3 @@
-variable "app_name" {
-  type = string
-}
-
 variable "min" {
   type = number
 }
@@ -14,10 +10,18 @@ variable "desired" {
   type = number
 }
 
-variable "template_id" {
-  type = string
+variable "templates" {
+  type = list(object({
+    template_app = string
+    template_id = string
+    public = bool
+  }))
 }
 
-variable "subnet_ids" {
+variable "public_subnets" {
+  type = list(string)
+}
+
+variable "private_subnets" {
   type = list(string)
 }

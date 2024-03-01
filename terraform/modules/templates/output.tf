@@ -1,3 +1,5 @@
-output "template_id" {
-  value = aws_launch_template.app_template.id
+output "template_details" {
+  value = [
+    for template in aws_launch_template.app_template : {template_app = template.name, template_id = template.id, public = template.tags.Public}
+  ]
 }

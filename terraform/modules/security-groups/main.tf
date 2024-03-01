@@ -1,87 +1,67 @@
-resource "aws_security_group" "allow_http" {
-  name        = "allow_http"
-  description = "Allow http inbound traffic"
-  vpc_id      = var.vpc_id
-}
+# Create Security Groups (check app requirements)
 
-resource "aws_security_group_rule" "allow_http" {
-  type              = "ingress"
-
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks  = ["::/0"]
-
-  security_group_id = aws_security_group.allow_http.id
-}
-resource "aws_security_group" "allow_https" {
-  name        = "allow_https"
-  vpc_id      = var.vpc_id
-}
-
-resource "aws_security_group_rule" "allow_https" {
-  type              = "ingress"
-
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks  = ["::/0"]
-
-  security_group_id = aws_security_group.allow_https.id
-}
-
-resource "aws_security_group" "allow_egress" {
-  name        = "allow_egress"
-  vpc_id      = var.vpc_id
-}
-
-resource "aws_security_group_rule" "allow_egress" {
-  type              = "egress"
-
-  from_port         = 0
-  to_port           = 0
-  protocol          = -1
-  cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks  = ["::/0"]
-
-  security_group_id = aws_security_group.allow_egress.id
-}
-
-data "http" "my-ipv4" {
+data "http" "myipaddr" {
   url = "http://ipv4.icanhazip.com"
 }
 
-resource "aws_security_group" "allow_ssh" {
-  name = "allow_ssh"
-  vpc_id = var.vpc_id
-}
-
-resource "aws_security_group_rule" "allow_ssh" {
-  type = "ingress"
-
-  from_port = 22
-  to_port = 22
-  protocol = "tcp"
-  cidr_blocks = ["${chomp(data.http.my-ipv4.response_body)}/32"]
-
-  security_group_id = aws_security_group.allow_ssh.id
-}
-
-resource "aws_security_group" "allow_3000" {
-  name        = "allow_3000"
+resource "aws_security_group" "public_facing" {
+  name        = "public-facing-security-group"
+  description = "Security group for instances to communicate publicly"
   vpc_id      = var.vpc_id
 }
 
-resource "aws_security_group_rule" "allow_3000" {
-  type              = "ingress"
-  
-  from_port         = 3000
-  to_port           = 3000
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks  = ["::/0"]
+resource "aws_vpc_security_group_ingress_rule" "app_port_ipv4" {
+  security_group_id = aws_security_group.public_facing.id
 
-  security_group_id = aws_security_group.allow_3000.id
+  cidr_ipv4   = "0.0.0.0/0"
+  from_port   = 3000
+  ip_protocol = "tcp"
+  to_port     = 3000
+}
+
+resource "aws_vpc_security_group_ingress_rule" "public_ssh_tunnel" {
+  security_group_id = aws_security_group.public_facing.id
+
+  cidr_ipv4   = "0.0.0.0/0"
+  from_port   = 22
+  ip_protocol = "tcp"
+  to_port     = 22
+}
+
+resource "aws_vpc_security_group_egress_rule" "outgoing_ipv4" {
+  security_group_id = aws_security_group.public_facing.id
+
+  cidr_ipv4   = "0.0.0.0/0"
+  ip_protocol = "-1"
+}
+
+resource "aws_security_group" "private_ssh" {
+  name        = "private-ssh-connections-security-group"
+  description = "Security group for ssh connections to private instances"
+  vpc_id      = var.vpc_id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "private_ssh_tunnel" {
+  security_group_id = aws_security_group.private_ssh.id
+
+  cidr_ipv4   = "${chomp(data.http.myipaddr.response_body)}/32"
+  from_port   = 22
+  ip_protocol = "tcp"
+  to_port     = 22
+}
+
+resource "aws_vpc_security_group_ingress_rule" "internal_comms" {
+  security_group_id = aws_security_group.public_facing.id
+
+  cidr_ipv4   = "10.0.0.0/16"
+  from_port   = 3000
+  ip_protocol = "tcp"
+  to_port     = 3000
+}
+
+resource "aws_vpc_security_group_egress_rule" "private_outgoing_ipv4" {
+  security_group_id = aws_security_group.private_ssh.id
+
+  cidr_ipv4   = "0.0.0.0/0"
+  ip_protocol = "-1"
 }

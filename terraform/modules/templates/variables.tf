@@ -3,15 +3,11 @@ variable "instance_type" {
   default = "t2.micro"
 }
 
-variable "app_name" {
-  type = string
+variable "private_security_groups" {
+  type = list(string)
 }
 
-variable "ami_to_use" {
-  type = string
-}
-
-variable "security_groups" {
+variable "public_security_groups" {
   type = list(string)
 }
 
@@ -19,6 +15,10 @@ variable "key" {
   type = string
 }
 
-variable "public" {
-  type = bool
+variable "apps" {
+  type = list(object({
+    app_name = string
+    image = string
+    public = bool
+  }))
 }

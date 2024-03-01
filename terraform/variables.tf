@@ -1,15 +1,26 @@
-variable "smart_auth_ami" {
-  type = string
+variable "public_subnets" {
+  type        = list(string)
+  description = "A list of the CIDR ranges required for the public subnets"
 }
 
-variable "smart_heating_ami" {
-  type = string
+variable "private_subnets" {
+  type        = list(string)
+  description = "A list of the CIDR ranges required for the private subnets"
 }
 
-variable "smart_lighting_ami" {
-  type = string
+variable "availability_zones" {
+  type        = list(string)
+  description = "A list of the Availability Zones you wish to provision infrastructure in"
 }
 
-variable "smart_status_ami" {
+variable "apps" {
+  type = list(object({
+    app_name = string
+    image = string
+    public = bool
+  }))
+}
+
+variable "key_name" {
   type = string
 }

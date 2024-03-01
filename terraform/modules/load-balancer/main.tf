@@ -1,5 +1,5 @@
 resource "aws_lb_target_group" "primary-lb-target" {
-  name = "autoscale-lb-tg"
+  name = "${var.name}-lb-tg"
 
   protocol = var.target_protocol
   protocol_version = var.target_protocol_ver
@@ -19,13 +19,13 @@ resource "aws_lb_target_group" "primary-lb-target" {
 }
 
 resource "aws_lb" "load_balancer" {
-  name               = "autoscale-lb"
+  name               = "${var.name}-lb"
   load_balancer_type = "application"
-  internal           = false
+  internal           = var.internal_only
   enable_deletion_protection = false
 
-  security_groups    = var.security_groups
-  subnets            = var.public_subnets
+  security_groups    = var.internal_only ? var.private_security_groups : var.public_security_groups
+  subnets            = var.internal_only ? var.private_subnets : var.public_subnets
 
   tags = {
     ManagedBy = "Terraform"

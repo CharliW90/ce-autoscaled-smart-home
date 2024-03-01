@@ -27,11 +27,11 @@ variable "health_check_protocol" {
   default = "HTTP"
 }
 
-variable "security_groups" {
+variable "public_subnets" {
   type = list(string)
 }
 
-variable "public_subnets" {
+variable "private_subnets" {
   type = list(string)
 }
 
@@ -47,4 +47,20 @@ variable "listen_protocol" {
 
 variable "autoscaling_group" {
   type = string
+}
+
+variable "name" {
+  type = string
+}
+
+variable "internal_only" {
+  type = bool
+}
+
+variable "public_security_groups" {
+  type = list(string)
+}
+
+variable "private_security_groups" {
+  type = list(string)
 }
