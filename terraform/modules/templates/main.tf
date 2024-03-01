@@ -10,7 +10,7 @@ resource "aws_launch_template" "app_template" {
   key_name = var.key
 
   network_interfaces {
-    security_groups = var.apps.public ? var.public_security_groups : var.private_security_groups
+    security_groups = var.apps[count.index].public ? var.public_security_groups : var.private_security_groups
     associate_public_ip_address = var.apps[count.index].public
   }
 
