@@ -1,0 +1,1 @@
+app_names = [ "smart-auth", "smart-heating", "smart-lighting", "smart-status" ]
